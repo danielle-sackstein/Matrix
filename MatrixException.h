@@ -5,6 +5,6 @@
 class MatrixException : public std::exception
 {
 public:
-	virtual char const* what() const throw();
+	virtual const char * what() const throw();
 	virtual ~MatrixException();
 };

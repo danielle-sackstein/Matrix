@@ -3,7 +3,6 @@
 #include <iostream>
 #include "MatrixException.h"
 
-
 #pragma once
 
 using std::vector;
@@ -24,17 +23,17 @@ public:
 
 	~Matrix();
 
-	Matrix &operator=(const Matrix &);
+	Matrix &operator=(const Matrix<T> &);
 
-	Matrix &operator+(const Matrix &) const;
+	Matrix &operator+(const Matrix<T> &) const;
 
-	Matrix &operator-(const Matrix &) const;
+	Matrix &operator-(const Matrix<T> &) const;
 
-	Matrix &operator*(const Matrix &) const;
+	Matrix &operator*(const Matrix<T> &) const;
 
-	bool operator==(const Matrix &) const;
+	bool operator==(const Matrix<T> &) const;
 
-	bool operator!=(const Matrix &) const;
+	bool operator!=(const Matrix<T> &) const;
 
 	bool isSquareMatrix() const;
 
@@ -44,7 +43,8 @@ public:
 
 	Matrix &operator()(unsigned int, unsigned int);
 
-	friend std::ostream &operator<<(std::ostream &, const Matrix &);
+	template<class T>
+	friend std::ostream &operator<<(std::ostream &, const Matrix<T> &);
 
 	inline unsigned int rows()
 	{ return _rows; }
@@ -58,7 +58,7 @@ private:
 
 	unsigned int _rows;
 	unsigned int _cols;
-	vector _data;
+	vector<T> _data;
 
 };
 
@@ -103,7 +103,7 @@ Matrix<T>::~Matrix()
 }
 
 template<class T>
-Matrix &Matrix<T>::operator=(const Matrix &matrix)
+Matrix<T> &Matrix<T>::operator=(const Matrix<T> &matrix)
 {
 	if (this != &matrix)
 	{
@@ -117,7 +117,7 @@ Matrix &Matrix<T>::operator=(const Matrix &matrix)
 }
 
 template<class T>
-Matrix &Matrix<T>::operator+(const Matrix &rhs) const
+Matrix<T> &Matrix<T>::operator+(const Matrix<T> &rhs) const
 {
 	if (_rows != rhs._rows || _cols != rhs._cols)
 	{
@@ -134,7 +134,7 @@ Matrix &Matrix<T>::operator+(const Matrix &rhs) const
 }
 
 template<class T>
-Matrix &Matrix<T>::operator-(const Matrix &rhs) const
+Matrix<T> &Matrix<T>::operator-(const Matrix<T> &rhs) const
 {
 	if (_rows != rhs._rows || _cols != rhs._cols)
 	{
@@ -150,7 +150,7 @@ Matrix &Matrix<T>::operator-(const Matrix &rhs) const
 }
 
 template<class T>
-bool Matrix<T>::operator==(const Matrix &rhs) const
+bool Matrix<T>::operator==(const Matrix<T> &rhs) const
 {
 	if (_rows != rhs._rows || _cols != rhs._cols)
 	{
@@ -168,13 +168,13 @@ bool Matrix<T>::operator==(const Matrix &rhs) const
 }
 
 template<class T>
-bool Matrix<T>::operator!=(const Matrix &rhs) const
+bool Matrix<T>::operator!=(const Matrix<T> &rhs) const
 {
 	return !operator==(rhs);
 }
 
 template<class T>
-Matrix &Matrix::operator*(const Matrix &rhs) const
+Matrix<T> &Matrix::operator*(const Matrix<T> &rhs) const
 {
 	Matrix<T> *matrix = new Matrix<T>(_rows, rhs._cols);
 	for (unsigned int i = 0; i < _rows; i++)
@@ -185,7 +185,7 @@ Matrix &Matrix::operator*(const Matrix &rhs) const
 
 			for (unsigned int k = 0; k < rhs._cols; k++)
 			{
-				sum = sum + _data(i, k) * rhs._data(k, j);
+				sum = sum + this->(i, k) * rhs.(k, j);
 			}
 			matrix->(i, j) = sum;
 		}
@@ -200,7 +200,7 @@ bool Matrix<T>::isSquareMatrix() const
 }
 
 template<class T>
-Matrix &Matrix<T>::trans()
+Matrix<T> &Matrix<T>::trans()
 {
 	if (!this->isSquareMatrix())
 	{
@@ -215,7 +215,7 @@ Matrix &Matrix<T>::trans()
 		{
 			if (i != j)
 			{
-				matrix->(i, j) = this->(j, i);
+				matrix->(i, j) = (*this)(j, i);
 			}
 		}
 	}
@@ -224,7 +224,7 @@ Matrix &Matrix<T>::trans()
 
 
 template<class T>
-friend std::ostream &Matrix<T>::operator<<(std::ostream &os, const Matrix &matrix)
+std::ostream &Matrix<T>::operator<<(std::ostream &os, const Matrix<T> &matrix)
 {
 	for (unsigned int i = 0; i < matrix._rows; i++)
 	{
@@ -238,13 +238,13 @@ friend std::ostream &Matrix<T>::operator<<(std::ostream &os, const Matrix &matri
 }
 
 template<class T>
-Matrix &Matrix<T>::operator()(unsigned int row, unsigned int col)
+Matrix<T> &Matrix<T>::operator()(unsigned int row, unsigned int col)
 {
 	return _data[row * col + col];
 }
 
 template<class T>
-const Matrix &Matrix<T>::operator()(unsigned int row, unsigned int col) const
+const Matrix<T> & Matrix<T>::operator()(unsigned int row, unsigned int col) const
 {
 	return _data[row * col + col];
 }
