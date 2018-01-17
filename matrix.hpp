@@ -44,10 +44,10 @@ public:
 	template<typename U>
 	friend std::ostream &operator<<(std::ostream &, const Matrix<U> &);
 
-	inline unsigned int rows()
+	inline unsigned int rows() const
 	{ return _rows; }
 
-	inline unsigned int cols()
+	inline unsigned int cols() const
 	{ return _cols; }
 
 	typedef typename std::vector<T>::const_iterator const_iterator;
