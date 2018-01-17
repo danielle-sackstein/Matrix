@@ -223,7 +223,7 @@ Matrix<T> &Matrix<T>::trans()
 }
 
 template<class T>
-std::ostream operator<<(std::ostream &os, const Matrix<T> &matrix)
+std::ostream &operator<<(std::ostream &os, const Matrix<T> &matrix)
 {
 	for (unsigned int i = 0; i < matrix._rows; i++)
 	{
