@@ -1,11 +1,10 @@
 #include "MatrixException.h"
 
-const char* MatrixException::what() const
-{
-	return "invalid matrix cordinates";
-}
+MatrixException::MatrixException(const std::string &string) :
+		_string(string)
+{}
 
-MatrixException::~MatrixException()
+const char *MatrixException::what() const noexcept
 {
-	delete MatrixException;
+	return _string.c_str();
 }

@@ -43,9 +43,7 @@ public:
 
 	Matrix &operator()(unsigned int, unsigned int);
 
-	template<class T>
 	friend std::ostream &operator<<(std::ostream &, const Matrix<T> &);
-
 	inline unsigned int rows()
 	{ return _rows; }
 
@@ -54,7 +52,9 @@ public:
 
 
 private:
-	bool _hasValidCords(unsigned int rows, unsigned int cols) const;
+	unsigned int _hasValidRows(unsigned int rows, unsigned int cols) const;
+
+	unsigned int _hasValidCols(unsigned int rows, unsigned int cols) const;
 
 	unsigned int _rows;
 	unsigned int _cols;
@@ -72,8 +72,8 @@ Matrix<T>::Matrix()
 
 template<class T>
 Matrix<T>::Matrix(unsigned int rows, unsigned int cols):
-		_rows(_hasValidCords(rows, cols) ? rows : throw new MatrixException),
-		_cols(_hasValidCords(rows, cols) ? cols : throw new MatrixException),
+		_rows(_hasValidRows(rows, cols)),
+		_cols(_hasValidCols(rows, cols)),
 		_data(vector<T>(rows * cols, T{0}))
 {}
 
@@ -91,8 +91,8 @@ Matrix<T>::Matrix(const Matrix<T> &&matrix):
 
 template<class T>
 Matrix<T>::Matrix(unsigned int rows, unsigned int cols, const vector<T> &cells):
-		_rows(_hasValidCords(rows, cols) ? rows : throw new MatrixException),
-		_cols(_hasValidCords(rows, cols) ? cols : throw new MatrixException),
+		_rows(_hasValidRows(rows, cols)),
+		_cols(_hasValidCols(rows, cols) ? cols : throw MatrixException("invalid rows or cols")),
 		_data(cells)
 {}
 
@@ -120,7 +120,7 @@ Matrix<T> &Matrix<T>::operator+(const Matrix<T> &rhs) const
 {
 	if (_rows != rhs._rows || _cols != rhs._cols)
 	{
-		throw new MatrixException;
+		throw MatrixException(" ");
 	}
 
 	Matrix<T> *matrix = new Matrix<T>(_rows, _cols);
@@ -137,7 +137,7 @@ Matrix<T> &Matrix<T>::operator-(const Matrix<T> &rhs) const
 {
 	if (_rows != rhs._rows || _cols != rhs._cols)
 	{
-		throw new MatrixException;
+		throw MatrixException("cannot perform - with different matrices");
 	}
 
 	Matrix<T> *matrix = new Matrix<T>(_rows, _cols);
@@ -153,7 +153,7 @@ bool Matrix<T>::operator==(const Matrix<T> &rhs) const
 {
 	if (_rows != rhs._rows || _cols != rhs._cols)
 	{
-		throw new MatrixException;
+		throw MatrixException("  ");
 	}
 
 	for (unsigned int i = 0; i < _rows * _cols; i++)
@@ -203,7 +203,7 @@ Matrix<T> &Matrix<T>::trans()
 {
 	if (!this->isSquareMatrix())
 	{
-		throw new MatrixException;
+		throw MatrixException("cannot perform trans on non squared matrix");
 	}
 
 	Matrix<T> *matrix = new Matrix<T>(_rows, _cols);
@@ -226,7 +226,7 @@ std::ostream &operator<<(std::ostream &os, const Matrix<T> &matrix)
 {
 	for (unsigned int i = 0; i < matrix._rows; i++)
 	{
-		for (unsigned int j = 0; j < matrix._rows; j++)
+		for (unsigned int j = 0; j < matrix._cols; j++)
 		{
 			os << matrix(i, j) << "	";
 		}
@@ -248,7 +248,21 @@ const Matrix<T> &Matrix<T>::operator()(unsigned int row, unsigned int col) const
 }
 
 template<class T>
-bool Matrix<T>::_hasValidCords(unsigned int rows, unsigned int cols) const
+unsigned int Matrix<T>::_hasValidCols(unsigned int rows, unsigned int cols) const
 {
-	return !(rows == 0 && cols != 0) && !(rows != 0 && cols == 0);
+	if ((rows == 0 && cols != 0) || (rows != 0 && cols == 0))
+	{
+		throw MatrixException("invalid rows or cols");
+	}
+	return _cols;
+}
+
+template<class T>
+unsigned int Matrix<T>::_hasValidRows(unsigned int rows, unsigned int cols) const
+{
+	if ((rows == 0 && cols != 0) || (rows != 0 && cols == 0))
+	{
+		throw MatrixException("invalid rows or cols");
+	}
+	return _rows;
 }
