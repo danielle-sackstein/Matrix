@@ -23,13 +23,13 @@ public:
 
 	~Matrix();
 
-	Matrix &operator=(const Matrix<T> &);
+	Matrix<T>&operator=(const Matrix<T> &);
 
-	Matrix &operator+(const Matrix<T> &) const;
+	Matrix<T> &operator+(const Matrix<T> &) const;
 
-	Matrix &operator-(const Matrix<T> &) const;
+	Matrix<T> &operator-(const Matrix<T> &) const;
 
-	Matrix &operator*(const Matrix<T> &) const;
+	Matrix<T> &operator*(const Matrix<T> &) const;
 
 	bool operator==(const Matrix<T> &) const;
 
@@ -37,19 +37,28 @@ public:
 
 	bool isSquareMatrix() const;
 
-	Matrix &trans();
+	Matrix<T> &trans() const;
 
-	const Matrix &operator()(unsigned int, unsigned int) const;
+	const <T> &operator()(unsigned int, unsigned int) const;
 
-	Matrix &operator()(unsigned int, unsigned int);
+	<T> &operator()(unsigned int, unsigned int);
 
-	friend std::ostream &operator<<(std::ostream &, const Matrix<T> &);
+	template<typename U>
+	friend std::ostream &operator<<(std::ostream &, const Matrix<U> &);
+
 	inline unsigned int rows()
 	{ return _rows; }
 
 	inline unsigned int cols()
 	{ return _cols; }
 
+	typedef typename std::vector<T>::const_iterator constIt;
+
+	typename std::vector<T>::const_iterator begin() const
+	{ return _data.begin(); }
+
+	typename std::vector<T>::const_iterator end() const
+	{ return _data.begin(); }
 
 private:
 	unsigned int _hasValidRows(unsigned int rows, unsigned int cols) const;
@@ -59,7 +68,6 @@ private:
 	unsigned int _rows;
 	unsigned int _cols;
 	vector<T> _data;
-
 };
 
 template<class T>
@@ -86,13 +94,13 @@ Matrix<T>::Matrix(const Matrix<T> &matrix):
 
 template<class T>
 Matrix<T>::Matrix(const Matrix<T> &&matrix):
-		_rows(matrix._rows), _cols(matrix._cols), _data(std::move(matrix))
+		_rows(matrix._rows), _cols(matrix._cols), _data(std::move(matrix._data))
 {}
 
 template<class T>
 Matrix<T>::Matrix(unsigned int rows, unsigned int cols, const vector<T> &cells):
 		_rows(_hasValidRows(rows, cols)),
-		_cols(_hasValidCols(rows, cols) ? cols : throw MatrixException("invalid rows or cols")),
+		_cols(_hasValidCols(rows, cols)),
 		_data(cells)
 {}
 
@@ -109,7 +117,7 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &matrix)
 		_rows = matrix._rows;
 		_cols = matrix._cols;
 
-		//vector implements an operator=
+		// vector implements an operator=
 		_data = matrix._data;
 	}
 	return *this;
@@ -153,7 +161,7 @@ bool Matrix<T>::operator==(const Matrix<T> &rhs) const
 {
 	if (_rows != rhs._rows || _cols != rhs._cols)
 	{
-		throw MatrixException("  ");
+		throw MatrixException("cannot perform == with different matrices\n");
 	}
 
 	for (unsigned int i = 0; i < _rows * _cols; i++)
@@ -180,7 +188,7 @@ Matrix<T> &Matrix<T>::operator*(const Matrix<T> &rhs) const
 	{
 		for (unsigned int j = 0; j < rhs._cols; j++)
 		{
-			unsigned int sum = 0;
+			T sum = T{0};
 
 			for (unsigned int k = 0; k < rhs._cols; k++)
 			{
@@ -199,11 +207,11 @@ bool Matrix<T>::isSquareMatrix() const
 }
 
 template<class T>
-Matrix<T> &Matrix<T>::trans()
+Matrix<T> &Matrix<T>::trans() const
 {
 	if (!this->isSquareMatrix())
 	{
-		throw MatrixException("cannot perform trans on non squared matrix");
+		throw MatrixException("cannot perform trans on non squared matrix\n");
 	}
 
 	Matrix<T> *matrix = new Matrix<T>(_rows, _cols);
@@ -236,13 +244,13 @@ std::ostream &operator<<(std::ostream &os, const Matrix<T> &matrix)
 }
 
 template<class T>
-Matrix<T> &Matrix<T>::operator()(unsigned int row, unsigned int col)
+<T> &Matrix<T>::operator()(unsigned int row, unsigned int col)
 {
 	return _data[row * col + col];
 }
 
 template<class T>
-const Matrix<T> &Matrix<T>::operator()(unsigned int row, unsigned int col) const
+const <T> &Matrix<T>::operator()(unsigned int row, unsigned int col) const
 {
 	return _data[row * col + col];
 }
@@ -250,9 +258,13 @@ const Matrix<T> &Matrix<T>::operator()(unsigned int row, unsigned int col) const
 template<class T>
 unsigned int Matrix<T>::_hasValidCols(unsigned int rows, unsigned int cols) const
 {
-	if ((rows == 0 && cols != 0) || (rows != 0 && cols == 0))
+	if ((rows == 0 && cols != 0))
 	{
-		throw MatrixException("invalid rows or cols");
+		throw MatrixException("invalid rows\n");
+	}
+	if (rows != 0 && cols == 0)
+	{
+		throw MatrixException("invalid cols\n");
 	}
 	return _cols;
 }
@@ -260,9 +272,14 @@ unsigned int Matrix<T>::_hasValidCols(unsigned int rows, unsigned int cols) cons
 template<class T>
 unsigned int Matrix<T>::_hasValidRows(unsigned int rows, unsigned int cols) const
 {
-	if ((rows == 0 && cols != 0) || (rows != 0 && cols == 0))
+	if ((rows == 0 && cols != 0))
 	{
-		throw MatrixException("invalid rows or cols");
+		throw MatrixException("invalid rows\n");
+	}
+	if (rows != 0 && cols == 0)
+	{
+		throw MatrixException("invalid cols\n");
 	}
 	return _rows;
 }
+
