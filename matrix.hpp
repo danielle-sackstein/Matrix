@@ -174,7 +174,7 @@ bool Matrix<T>::operator!=(const Matrix<T> &rhs) const
 }
 
 template<class T>
-Matrix<T> &Matrix::operator*(const Matrix<T> &rhs) const
+Matrix<T> &Matrix<T>::operator*(const Matrix<T> &rhs) const
 {
 	Matrix<T> *matrix = new Matrix<T>(_rows, rhs._cols);
 	for (unsigned int i = 0; i < _rows; i++)
@@ -185,9 +185,9 @@ Matrix<T> &Matrix::operator*(const Matrix<T> &rhs) const
 
 			for (unsigned int k = 0; k < rhs._cols; k++)
 			{
-				sum = sum + this->(i, k) * rhs.(k, j);
+				sum = sum + this->operator()(i, k) * rhs.operator()(k, j);
 			}
-			matrix->(i, j) = sum;
+			matrix->operator()(i, j) = sum;
 		}
 	}
 	return *matrix;
@@ -215,16 +215,15 @@ Matrix<T> &Matrix<T>::trans()
 		{
 			if (i != j)
 			{
-				matrix->(i, j) = (*this)(j, i);
+				matrix->operator()(i, j) = (*this)(j, i);
 			}
 		}
 	}
 	return *matrix;
 }
 
-
 template<class T>
-std::ostream &Matrix<T>::operator<<(std::ostream &os, const Matrix<T> &matrix)
+std::ostream operator<<(std::ostream &os, const Matrix<T> &matrix)
 {
 	for (unsigned int i = 0; i < matrix._rows; i++)
 	{
@@ -244,12 +243,13 @@ Matrix<T> &Matrix<T>::operator()(unsigned int row, unsigned int col)
 }
 
 template<class T>
-const Matrix<T> & Matrix<T>::operator()(unsigned int row, unsigned int col) const
+const Matrix<T> &Matrix<T>::operator()(unsigned int row, unsigned int col) const
 {
 	return _data[row * col + col];
 }
 
-bool _hasValidCords(unsigned int rows, unsigned int cols) const
+template<class T>
+bool Matrix<T>::_hasValidCords(unsigned int rows, unsigned int cols) const
 {
 	return !(rows == 0 && cols != 0) && !(rows != 0 && cols == 0);
 }
