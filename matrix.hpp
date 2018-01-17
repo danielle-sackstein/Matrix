@@ -99,7 +99,6 @@ Matrix<T>::Matrix(unsigned int rows, unsigned int cols, const vector<T> &cells):
 template<class T>
 Matrix<T>::~Matrix()
 {
-	delete Matrix<T>;
 }
 
 template<class T>
