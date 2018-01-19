@@ -23,21 +23,17 @@
 //{
 //	std::chrono::duration<double> elapsed_seconds =
 //			std::chrono::system_clock::now() - tictoc_stack.top();
-//	std::cout <<message << elapsed_seconds.count()<<std::endl;
+//	std::cout << message << elapsed_seconds.count() << std::endl;
 //	tictoc_stack.pop();
 //}
 //
-///**
-// * calculates and prints the time of the operations + and * on the matrices on the library
-// * Matrix.hpp
-// * @param n the size of the matrix
-// */
-//void printLibraryTime(unsigned int n){
 //
-//	std::vector<int> v (n*n, 1);
+//void printLibraryTime(unsigned int n)
+//{
+//	std::vector<int> v(n * n, 1);
 //
-//	Matrix<int> m1 (n,n,v);
-//	Matrix<int> m2 (n,n,v);
+//	Matrix<int> m1(n, n, v);
+//	Matrix<int> m2(n, n, v);
 //
 //	// operation +
 //	tic();
@@ -52,6 +48,33 @@
 //	Matrix<int> mul = m1 * m2;
 //
 //	toc("matlib mult ");
+//}
+//
+///**
+// * calculates and prints the time of the operations + and * on the matrices on the library
+// * Matrix.hpp
+// * @param n the size of the matrix
+// */
+//void printParallelTime(unsigned int n)
+//{
+//	std::vector<int> v(n * n, 1);
+//
+//	Matrix<int> m1(n, n, v);
+//	Matrix<int> m2(n, n, v);
+//
+//	// operation +
+//	tic();
+//
+//	Matrix<int> add = m1 + m2;
+//
+//	toc("matlibP add ");
+//
+//	// operation *
+//	tic();
+//
+//	Matrix<int> mul = m1 * m2;
+//
+//	toc("matlibP mult ");
 //}
 //
 ///**
@@ -84,14 +107,17 @@
 // * @param argv argument which represents the size of the matrix.
 // * @return
 // */
-//int main3(int argc, char *argv[])
+//int main(int argc, char *argv[])
 //{
 //	unsigned int n;
-//	sscanf (argv[1],"%d",&n);
+//	sscanf(argv[1], "%d", &n);
 //
-//	std::cout<<"size "<<n<<std::endl;
+//	std::cout << "size " << n << std::endl;
 //
 //	printEigenTime(n);
 //	printLibraryTime(n);
+//	Matrix<int>::setParallel(true);
+//	printParallelTime(n);
+//
 //}
 //

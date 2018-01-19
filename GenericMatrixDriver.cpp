@@ -60,7 +60,7 @@ const T readScalarLine();
 void Fill(Matrix<int> &matrix, int val);
 bool Check(const Matrix<int> &matrix, int val);
 
-void Test()
+void TestMult()
 {
     Matrix<int> A(50, 100);
     Matrix<int> B(100, 50);
@@ -72,6 +72,20 @@ void Test()
     bool passed = Check(C, 100);
 
     std::cout << (passed ? "PASSED" : "FAILED") << "\n";
+}
+
+void TestAdd()
+{
+	Matrix<int> A(2, 2);
+	Matrix<int> B(2, 2);
+
+	Fill(A, 1);
+	Fill(B, 2);
+
+	Matrix<int> C = A + B;
+	bool passed = Check(C, 3);
+
+	std::cout << (passed ? "PASSED" : "FAILED") << "\n";
 }
 
 void Fill(Matrix<int> &matrix, int val) {
@@ -97,9 +111,10 @@ bool Check(const Matrix<int> &matrix, int val) {
     return true;
 }
 
-int main()
+int main34234()
 {
-    Test();
+//	TestMult();
+	TestAdd();
     return 0;
 
 	std::cout << "Choose the scalar field of the components of the matrix" << std::endl;

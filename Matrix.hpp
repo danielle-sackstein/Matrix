@@ -67,8 +67,10 @@ public:
 
 private:
 
-    static Matrix<T> multSerial(const Matrix<T> &lhs, const Matrix<T> &rhs);
-    static Matrix<T> multParallel(const Matrix<T> &lhs, const Matrix<T> &rhs);
+    static Matrix<T> _multSerial(const Matrix<T> &lhs, const Matrix<T> &rhs);
+    static Matrix<T> _addSerial(const Matrix<T> &lhs, const Matrix<T> &rhs);
+    static Matrix<T> _multParallel(const Matrix<T> &lhs, const Matrix<T> &rhs);
+    static Matrix<T> _addParallel(const Matrix<T> &lhs, const Matrix<T> &rhs);
 
 	unsigned int _rows;
 	unsigned int _cols;
@@ -84,14 +86,12 @@ Matrix<T>::Matrix() :
 		_rows(1),
 		_cols(1),
 		_data(1, 0)
-{
-}
+{}
 
 template<class T>
 Matrix<T>::Matrix(unsigned int rows, unsigned int cols):
 		Matrix(rows, cols, std::vector<T>(rows * cols))
-{
-}
+{}
 
 template<class T>
 Matrix<T>::Matrix(const Matrix<T> &matrix):
@@ -144,14 +144,67 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T> &rhs) const
 		throw MatrixException("Incompatible dimensions");
 	}
 
-	Matrix<T> matrix(_rows, _cols);
+	return _isParallel
+		   ? _addParallel(*this, rhs)
+		   : _addSerial(*this, rhs);
+}
 
-	for (unsigned int i = 0; i < _rows * _cols; i++)
+template<class T>
+Matrix<T> Matrix<T>::_addSerial(const Matrix<T> &lhs, const Matrix<T> &rhs)
+{
+	Matrix<T> matrix(lhs._rows, lhs._cols);
+
+	for (unsigned int i = 0; i < lhs._rows * lhs._cols; i++)
 	{
-		matrix._data[i] = _data[i] + rhs._data[i];
+		matrix._data[i] = lhs._data[i] + rhs._data[i];
+	}
+	return matrix;
+}
+
+template <typename T>
+class VectorAdd
+{
+public:
+
+	VectorAdd(const Matrix<T> &lhs, const Matrix<T> &rhs, Matrix<T>& result) :
+			_lhs(lhs),
+			_rhs(rhs),
+			_result(result)
+	{}
+
+	void operator()(unsigned int i)
+	{
+		for (unsigned int j = 0; j < _lhs.cols(); j++)
+		{
+			_result(i,j) = _lhs(i,j) + _rhs(i,j);
+		}
 	}
 
-	return matrix;
+private:
+
+	const Matrix<T> &_lhs;
+	const Matrix<T> &_rhs;
+	Matrix<T>& _result;
+};
+
+template<class T>
+Matrix<T> Matrix<T>::_addParallel(const Matrix<T> &lhs, const Matrix<T> &rhs)
+{
+	Matrix<T> result (lhs._rows, rhs._cols);
+
+	VectorAdd<T> adder (lhs, rhs, result);
+
+	std::vector<std::thread> threads (lhs._cols);
+
+	for (unsigned int i = 0; i < lhs._rows; i++)
+	{
+		threads[i] = std::thread (std::ref(adder), i);
+	}
+
+	for (auto& t : threads){
+		t.join();
+	}
+	return result;
 }
 
 template<class T>
@@ -181,12 +234,12 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &rhs) const
 	}
 
 	return _isParallel
-		   ? multParallel(*this, rhs)
-		   : multSerial(*this, rhs);
+		   ? _multParallel(*this, rhs)
+		   : _multSerial(*this, rhs);
 }
 
 template<class T>
-Matrix<T> Matrix<T>::multSerial(const Matrix<T> &lhs, const Matrix<T> &rhs)
+Matrix<T> Matrix<T>::_multSerial(const Matrix<T> &lhs, const Matrix<T> &rhs)
 {
     Matrix<T> result (lhs._rows, rhs._cols);
 
@@ -235,14 +288,13 @@ public:
     }
 
 private:
-
     const Matrix<T> &_lhs;
     const Matrix<T> &_rhs;
     Matrix<T>& _result;
 };
 
 template<class T>
-Matrix<T> Matrix<T>::multParallel(const Matrix<T> &lhs, const Matrix<T> &rhs)
+Matrix<T> Matrix<T>::_multParallel(const Matrix<T> &lhs, const Matrix<T> &rhs)
 {
     Matrix<T> result (lhs._rows, rhs._cols);
 
