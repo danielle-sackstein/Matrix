@@ -69,7 +69,6 @@ Complex& operator*=(const Complex &other) ;
 private:
 	double _real;
 	double _imaginary;
-
 };
 
 #endif

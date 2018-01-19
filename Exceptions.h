@@ -3,10 +3,10 @@
 #include <exception>
 #include <string>
 
-class MatrixException : public std::exception
+class Exceptions : public std::exception
 {
 public:
-	MatrixException(const std::string &);
+	Exceptions(const std::string &);
 
 	const char *what() const noexcept override;
 

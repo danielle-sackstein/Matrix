@@ -57,7 +57,7 @@ void getNumFromString(const std::string &str, int *num);
 template<typename T>
 const T readScalarLine();
 
-int main()
+int main1()
 {
 
 	std::cout << "Choose the scalar field of the components of the matrix" << std::endl;
