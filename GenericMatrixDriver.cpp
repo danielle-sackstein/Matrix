@@ -57,8 +57,50 @@ void getNumFromString(const std::string &str, int *num);
 template<typename T>
 const T readScalarLine();
 
-int main1()
+void Fill(Matrix<int> &matrix, int val);
+bool Check(const Matrix<int> &matrix, int val);
+
+void Test()
 {
+    Matrix<int> A(50, 100);
+    Matrix<int> B(100, 50);
+
+    Fill(A, 1);
+    Fill(B, 2);
+
+    Matrix<int> C = A * B;
+    bool passed = Check(C, 100);
+
+    std::cout << (passed ? "PASSED" : "FAILED") << "\n";
+}
+
+void Fill(Matrix<int> &matrix, int val) {
+    for (int i=0; i < matrix.rows(); i++)
+    {
+        for (int j=0; j<matrix.cols(); j++)
+        {
+            matrix(i, j) = val;
+        }
+    }
+}
+
+bool Check(const Matrix<int> &matrix, int val) {
+    for (int i=0; i < matrix.rows(); i++)
+    {
+        for (int j=0; j<matrix.cols(); j++)
+        {
+            if (matrix(i, j) != val) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+int main()
+{
+    Test();
+    return 0;
 
 	std::cout << "Choose the scalar field of the components of the matrix" << std::endl;
 	std::cout << "(" << INT << " for ints, " << DOUBLE << " for double or "

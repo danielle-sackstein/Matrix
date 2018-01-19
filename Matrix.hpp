@@ -1,8 +1,9 @@
 #include <vector>
-#include <stdexcept>
+#include <exception>
 #include <iostream>
+#include <thread>
 
-#include "Exceptions.h"
+#include "MatrixException.h"
 #include "Complex.h"
 
 #pragma once
@@ -61,12 +62,22 @@ public:
 	const_iterator end() const
 	{ return _data.begin(); }
 
+    // TODO: Print
+    static void setParallel(bool isParallel) { _isParallel = isParallel; }
+
 private:
+
+    static Matrix<T> multSerial(const Matrix<T> &lhs, const Matrix<T> &rhs);
+    static Matrix<T> multParallel(const Matrix<T> &lhs, const Matrix<T> &rhs);
 
 	unsigned int _rows;
 	unsigned int _cols;
 	std::vector<T> _data;
+    static bool _isParallel;
 };
+
+template<typename T>
+bool Matrix<T>::_isParallel = true;
 
 template<class T>
 Matrix<T>::Matrix() :
@@ -104,7 +115,7 @@ Matrix<T>::Matrix(unsigned int rows, unsigned int cols, const std::vector<T> &ce
 {
 	if ((rows == 0) || (cols == 0))
 	{
-		throw Exceptions("invalid dimensions\n");
+		throw MatrixException("invalid dimensions\n");
 	}
 }
 
@@ -130,7 +141,7 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T> &rhs) const
 {
 	if ((_rows != rhs._rows) || (_cols != rhs._cols))
 	{
-		throw Exceptions("Incompatible dimensions");
+		throw MatrixException("Incompatible dimensions");
 	}
 
 	Matrix<T> matrix(_rows, _cols);
@@ -148,7 +159,7 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T> &rhs) const
 {
 	if (_rows != rhs._rows || _cols != rhs._cols)
 	{
-		throw Exceptions("Incompatible dimensions");
+		throw MatrixException("Incompatible dimensions");
 	}
 
 	Matrix<T> matrix(_rows, _cols);
@@ -166,29 +177,89 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &rhs) const
 {
 	if (_cols != rhs._rows)
 	{
-		throw Exceptions("Incompatible dimensions");
+		throw MatrixException("Incompatible dimensions");
 	}
 
-	Matrix<T> matrix(_rows, rhs._cols);
+	return _isParallel
+		   ? multParallel(*this, rhs)
+		   : multSerial(*this, rhs);
+}
 
-	const Matrix<T> &lhs = *this;
+template<class T>
+Matrix<T> Matrix<T>::multSerial(const Matrix<T> &lhs, const Matrix<T> &rhs)
+{
+    Matrix<T> result (lhs._rows, rhs._cols);
 
-	for (unsigned int i = 0; i < _rows; i++)
-	{
-		for (unsigned int j = 0; j < rhs._cols; j++)
-		{
-			T sum = T{};
+    for (unsigned int i = 0; i < lhs._rows; i++)
+    {
+        for (unsigned int j = 0; j < rhs._cols; j++)
+        {
+            T sum = T{};
 
-			for (unsigned int k = 0; k < rhs._cols; k++)
-			{
-				sum = sum + lhs(i, k) * rhs(k, j);
-			}
+            for (unsigned int k = 0; k < rhs._cols; k++)
+            {
+                sum = sum + lhs(i, k) * rhs(k, j);
+            }
 
-			matrix(i, j) = sum;
-		}
-	}
+            result(i, j) = sum;
+        }
+    }
 
-	return matrix;
+    return result;
+}
+
+template <typename T>
+class VectorMultiplier
+{
+public:
+
+    VectorMultiplier(const Matrix<T> &lhs, const Matrix<T> &rhs, Matrix<T>& result) :
+        _lhs(lhs),
+        _rhs(rhs),
+        _result(result)
+    {}
+
+    void operator()(unsigned int i)
+    {
+        for (unsigned int j = 0; j < _rhs.cols(); j++)
+        {
+            T sum = T{};
+
+            for (unsigned int k = 0; k < _rhs.cols(); k++)
+            {
+                sum = sum + _lhs(i, k) * _rhs(k, j);
+            }
+
+            _result(i, j) = sum;
+        }
+    }
+
+private:
+
+    const Matrix<T> &_lhs;
+    const Matrix<T> &_rhs;
+    Matrix<T>& _result;
+};
+
+template<class T>
+Matrix<T> Matrix<T>::multParallel(const Matrix<T> &lhs, const Matrix<T> &rhs)
+{
+    Matrix<T> result (lhs._rows, rhs._cols);
+
+    VectorMultiplier<T> multiplier (lhs, rhs, result);
+
+    std::vector<std::thread> threads (lhs._rows);
+
+    for (unsigned int i = 0; i < lhs._rows; i++)
+    {
+        threads[i] = std::thread (std::ref(multiplier), i);
+    }
+
+    for (auto& t : threads){
+        t.join();
+    }
+
+    return result;
 }
 
 template<class T>
@@ -221,13 +292,12 @@ bool Matrix<T>::isSquareMatrix() const
 	return _rows == _cols;
 }
 
-
 template<class T>
 Matrix<T> Matrix<T>::trans() const
 {
 	if (!isSquareMatrix())
 	{
-		throw Exceptions("Cannot perform trans on non squared matrix\n");
+		throw MatrixException("Cannot perform trans on non squared matrix\n");
 	}
 
 	Matrix<T> matrix(_rows, _cols);
@@ -248,8 +318,7 @@ inline Matrix<Complex> Matrix<Complex>::trans() const
 {
 	if (!isSquareMatrix())
 	{
-		throw Exceptions("Cannot perform trans on non squared matrix\n");
-
+		throw MatrixException("Cannot perform trans on non squared matrix\n");
 	}
 
 	Matrix<Complex> matrix(_rows, _cols);
@@ -284,11 +353,11 @@ T &Matrix<T>::operator()(unsigned int row, unsigned int col)
 {
 	if ((row > _rows) || (row < 0))
 	{
-		throw Exceptions("Row out of bounds");
+		throw MatrixException("Row out of bounds");
 	}
 	if ((col > _cols) || (col < 0))
 	{
-		throw Exceptions("Col out of bounds");
+		throw MatrixException("Col out of bounds");
 	}
 	return _data[row * _cols + col];
 }
@@ -298,11 +367,11 @@ const T &Matrix<T>::operator()(unsigned int row, unsigned int col) const
 {
 	if ((row > _rows) || (row < 0))
 	{
-		throw Exceptions("Row out of bounds");
+		throw MatrixException("Row out of bounds");
 	}
 	if ((col > _cols) || (col < 0))
 	{
-		throw Exceptions("Col out of bounds");
+		throw MatrixException("Col out of bounds");
 	}
 	return _data[row * _cols + col];
 }
