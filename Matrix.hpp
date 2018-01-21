@@ -418,7 +418,7 @@ Matrix<T> Matrix<T>::_addParallel(const Matrix<T> &lhs, const Matrix<T> &rhs)
 
 	VectorAdd<T> adder(lhs, rhs, result);
 
-	std::vector<std::thread> threads(lhs._cols);
+	std::vector<std::thread> threads(lhs._rows);
 
 	for (unsigned int i = 0; i < lhs._rows; i++)
 	{
