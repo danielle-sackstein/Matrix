@@ -89,9 +89,9 @@ void TestAdd()
 }
 
 void Fill(Matrix<int> &matrix, int val) {
-    for (int i=0; i < matrix.rows(); i++)
+    for (unsigned int i=0; i < matrix.rows(); i++)
     {
-        for (int j=0; j<matrix.cols(); j++)
+        for (unsigned int j=0; j<matrix.cols(); j++)
         {
             matrix(i, j) = val;
         }
@@ -99,9 +99,9 @@ void Fill(Matrix<int> &matrix, int val) {
 }
 
 bool Check(const Matrix<int> &matrix, int val) {
-    for (int i=0; i < matrix.rows(); i++)
+    for (unsigned int i=0; i < matrix.rows(); i++)
     {
-        for (int j=0; j<matrix.cols(); j++)
+        for (int unsigned j=0; j<matrix.cols(); j++)
         {
             if (matrix(i, j) != val) {
                 return false;

@@ -1,10 +1,10 @@
 #include "MatrixException.h"
 
 MatrixException::MatrixException(const std::string &string) :
-		_string(string)
+		_message(string)
 {}
 
 const char *MatrixException::what() const noexcept
 {
-	return _string.c_str();
+	return _message.c_str();
 }

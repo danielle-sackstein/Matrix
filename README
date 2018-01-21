@@ -3,8 +3,9 @@ danielle.s
 =  README For ex3 =
 =============================
 The results of TimeChecker:
+without optimisations (without the flag -O):
 
-           |                50 X 50               |               500 X 500
+           |                50 X 50                |              500 X 500
 ___________|_______ + _________|_______ * _________|________ + _______|_______ * ________
            |                   |                   |                  |
 matlibP    |  0.0172207sec     |  0.0274508sec     |  0.0477235sec    |   1.12624sec
@@ -16,14 +17,46 @@ ___________|___________________|___________________|__________________|_________
 matlib     |   3.81E-05sec     |  0.0013536sec     |  0.0033088sec    |   1.3958sec
 ___________|___________________|___________________|__________________|__________________
 
-Answering the questions:
-1.
 
+with optimisations (with the flag -O):
+
+           |                50 X 50                |              500 X 500
+___________|_______ + _________|_______ * _________|________ + _______|_______ * ________
+           |                   |                   |                  |
+matlibP    |  0.0072575sec     |  0.0057076sec     |  0.0488405sec    |   0.326968sec
+___________|___________________|___________________|__________________|__________________
+           |                   |                   |                  |
+eigen      |   1.05e-05sec     |  0.0001023sec     |  0.0010981sec    |   0.0517056sec
+___________|___________________|___________________|__________________|__________________
+           |                   |                   |                  |
+matlib     |   0.0212854sec    |  0.0155175sec     |  0.0691903sec    |   0.374233sec
+___________|___________________|___________________|__________________|__________________
+
+Answering the questions:
+1.When we compare between the eigen library and the matlib library, we can see that the
+performance of both states depends on the size of the matrix and the operation performed.
+For example, when creating a small matrix, the performance of our library is better than
+the eigen for an add operation, and for the performance multiplication operation, they are
+similar (with priority for eigen when we compile with an optimization flag -O).
+However, when creating a large matrix, the execution of the eigen is better than our library for
+the multiplication operation, and for the add operation the performance is
+similar(preferably to the eigen library when we compile with  an optimization flag). It is likely
+that .These differences are becase of the action of the algorithms in these actions. For example,
+the running time of the algorithm of multiplying our matrix as requested in the exercise is n ^ 3,
+when most likely That the running time of the eigen library algorithm is smaller.
+As for the parallel performance, we can see that when we are compiling with optimisation flags
+then the matlibP is necessarily better than our library, but still not better than the eigen.
+However, if we won't compile the code with optimiziation flag the performance of the parallel is
+the least of the three.
+The parallel advantage is that it performs operations that are independent at each other at the
+same time, but on the other hand creating lots of threads delayes its execution.
 
 2.
-בהשוואה בין המצב הטורי למצב הספרייה אפשר לראות שהביצועים של שני המצבים משתנים כתלות בגודל המטריצה ובפעולה המבוצעת.
-כך למשל, כאשר יוצרים מטריצה קטנה יחסית, הביצוע של הספרייה שלנו טוב יותר מהטורי עבור פעולת חיבור, ועבור פעולת כפל הביצועים הם דומים.
-לעומת זאת, כאשר יוצרים מטריצה גדולה, הביצוע של הטורי טוב יותר מהספרייה שלנו עבור פעולת הכפל, ועבור פעולת החיבור הביצועים הם דומים.סביר להניח כי
-הבדלים אלה נובעים מפעולת האלגורתימים בפעולות אלה. לדוגמא, זמן הריצה של ההאלגוריתם של הכפלת המטריצה שלנו כפי שהתבקש בתרגיל, הוא n^3, כאשר סביר להניח
-שזמן הריצה של האלגוריתם של המצב הטורי קטן יותר.
-
+There is necessarily a difference between the multiplication operations and the add operation for
+each library.
+The difference is caused from the algorithm operation and the number of calculations required.
+When we add matrices, we go through all the elements in the matrix once, that is, we perform
+n ^ 2 actions.
+However, in multiplying matrices more actions are performed. We perform n ^ 3 operations,
+since we go through all n ^ 2 elements but also perform iteration on each row and column
+(n more actions).

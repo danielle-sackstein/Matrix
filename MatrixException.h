@@ -11,5 +11,5 @@ public:
 	const char *what() const noexcept override;
 
 private :
-	std::string _string;
+	std::string _message;
 };
